@@ -87,6 +87,8 @@ const layersSetup = (layersOrder) => {
   const layers = layersOrder.map((layerObj, index) => ({
     id: index,
     elements: getElements(`${layersDir}/${layerObj.name}/`),
+    hue: layerObj.options?.['hue'],
+    sat: layerObj.options?.['sat'],
     name:
       layerObj.options?.["displayName"] != undefined
         ? layerObj.options?.["displayName"]
@@ -192,22 +194,78 @@ const addText = (_sig, x, y, size) => {
 };
 
 const drawElement = (_renderObject, _index, _layersLen) => {
+ 
+
   ctx.globalAlpha = _renderObject.layer.opacity;
   ctx.globalCompositeOperation = _renderObject.layer.blend;
-  text.only
-    ? addText(
-        `${_renderObject.layer.name}${text.spacer}${_renderObject.layer.selectedElement.name}`,
-        text.xGap,
-        text.yGap * (_index + 1),
-        text.size
-      )
-    : ctx.drawImage(
-        _renderObject.loadedImage,
-        0,
-        0,
-        format.width,
-        format.height
-      );
+
+  if (text.only) {
+    addText(
+      `${_renderObject.layer.name}${text.spacer}${_renderObject.layer.selectedElement.name}`,
+      text.xGap,
+      text.yGap * (_index + 1),
+      text.size
+    )
+  } else {
+
+    // Draw image to a temporary canvas if we are changing its color
+    const canvas = createCanvas(format.width, format.height);
+    const imageCtx = canvas.getContext("2d");
+    imageCtx.imageSmoothingEnabled = format.smoothing;
+    imageCtx.globalCompositeOperation = "source-over";
+
+    imageCtx.drawImage(
+      _renderObject.loadedImage,
+      0,
+      0,
+      format.width,
+      format.height
+    );
+
+     // step 1: adjust saturation (chroma, intensity)
+     if (_renderObject.layer.sat) {      
+      let sat = Math.floor(Math.random() * _renderObject.layer.sat.high + _renderObject.layer.sat.low);
+      console.log("sat =", sat);
+      imageCtx.globalCompositeOperation = "saturation";
+      imageCtx.fillStyle = "hsl(0," + sat + "%, 50%)";  // hue doesn't matter here
+      imageCtx.fillRect(0, 0);
+    }
+
+    // step 2: adjust hue, preserve luma and chroma
+    if (_renderObject.layer.hue) {
+      let hue = Math.floor(Math.random() * _renderObject.layer.hue.high + _renderObject.layer.hue.low);
+      console.log("hue =", hue)
+      imageCtx.globalCompositeOperation = "hue";
+      imageCtx.fillStyle = "hsl(" + hue + ",1%, 50%)";  // sat must be > 0, otherwise won't matter
+      imageCtx.fillRect(0, 0, format.width, format.height);
+    }
+
+    imageCtx.globalCompositeOperation = "destination-in";
+    imageCtx.drawImage(
+      _renderObject.loadedImage,
+      0,
+      0,
+      format.width,
+      format.height
+    );
+
+
+    console.log("---");
+    // draw imageCtx to ctx
+    console.log(ctx);
+    ctx.drawImage(
+      canvas,
+      0,
+      0,
+      format.width,
+      format.height
+    );
+
+   
+    
+  }
+
+
 
   addAttributes(_renderObject);
 };
@@ -222,6 +280,8 @@ const constructLayerToDna = (_dna = "", _layers = []) => {
       blend: layer.blend,
       opacity: layer.opacity,
       selectedElement: selectedElement,
+      sat: layer.sat,
+      hue: layer.hue
     };
   });
   return mappedDnaToLayers;
@@ -286,8 +346,7 @@ const createDna = (_layers) => {
       random -= layer.elements[i].weight;
       if (random < 0) {
         return randNum.push(
-          `${layer.elements[i].id}:${layer.elements[i].filename}${
-            layer.bypassDNA ? "?bypassDNA=true" : ""
+          `${layer.elements[i].id}:${layer.elements[i].filename}${layer.bypassDNA ? "?bypassDNA=true" : ""
           }`
         );
       }
@@ -304,8 +363,8 @@ const saveMetaDataSingleFile = (_editionCount) => {
   let metadata = metadataList.find((meta) => meta.edition == _editionCount);
   debugLogs
     ? console.log(
-        `Writing metadata for ${_editionCount}: ${JSON.stringify(metadata)}`
-      )
+      `Writing metadata for ${_editionCount}: ${JSON.stringify(metadata)}`
+    )
     : null;
   fs.writeFileSync(
     `${buildDir}/json/${_editionCount}.json`,
@@ -382,7 +441,7 @@ const startCreating = async () => {
             drawElement(
               renderObject,
               index,
-              layerConfigurations[layerConfigIndex].layersOrder.length
+              layerConfigurations[layerConfigIndex].layersOrder.length,              
             );
             if (gif.export) {
               hashlipsGiffer.add();

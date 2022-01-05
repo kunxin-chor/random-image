@@ -26,13 +26,48 @@ const layerConfigurations = [
   {
     growEditionSizeTo: 5,
     layersOrder: [
-      { name: "Background" },
-      { name: "Eyeball" },
-      { name: "Eye color" },
-      { name: "Iris" },
-      { name: "Shine" },
-      { name: "Bottom lid" },
-      { name: "Top lid" },
+      {
+        name: "Background", options: {
+          'sat': { high: 100, low: 0 },
+          'hue': { high: 100, low: 0 }
+        }
+      },
+      {
+        name: "Eyeball", options: {
+          'sat': { high: 100, low: 0 },
+          'hue': { high: 100, low: 0 }
+        }
+      },
+      {
+        name: "Eye color", options: {
+          'sat': { high: 100, low: 0 },
+          'hue': { high: 100, low: 0 }
+        }
+      },
+      {
+        name: "Iris", options: {
+          'sat': { high: 100, low: 0 },
+          'hue': { high: 100, low: 0 }
+        }
+      },
+      {
+        name: "Shine", options: {
+          'sat': { high: 100, low: 0 },
+          'hue': { high: 100, low: 0 }
+        }
+      },
+      {
+        name: "Bottom lid", options: {
+          'sat': { high: 100, low: 0 },
+          'hue': { high: 100, low: 0 }
+        }
+      },
+      {
+        name: "Top lid", options: {
+          'sat': { high: 100, low: 0 },
+          'hue': { high: 100, low: 0 }
+        }
+      },
     ],
   },
 ];
