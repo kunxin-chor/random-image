@@ -84,11 +84,13 @@ const getElements = (path) => {
 };
 
 const layersSetup = (layersOrder) => {
+  //console.log(layersOrder)
   const layers = layersOrder.map((layerObj, index) => ({
     id: index,
     elements: getElements(`${layersDir}/${layerObj.name}/`),
     hue: layerObj.options?.['hue'],
     sat: layerObj.options?.['sat'],
+    light: layerObj.options?.['light'],
     name:
       layerObj.options?.["displayName"] != undefined
         ? layerObj.options?.["displayName"]
@@ -194,7 +196,7 @@ const addText = (_sig, x, y, size) => {
 };
 
 const drawElement = (_renderObject, _index, _layersLen) => {
- 
+
 
   ctx.globalAlpha = _renderObject.layer.opacity;
   ctx.globalCompositeOperation = _renderObject.layer.blend;
@@ -222,8 +224,8 @@ const drawElement = (_renderObject, _index, _layersLen) => {
       format.height
     );
 
-     // step 1: adjust saturation (chroma, intensity)
-     if (_renderObject.layer.sat) {      
+    // step 1: adjust saturation (chroma, intensity)
+    if (_renderObject.layer.sat) {
       let sat = Math.floor(Math.random() * _renderObject.layer.sat.high + _renderObject.layer.sat.low);
       console.log("sat =", sat);
       imageCtx.globalCompositeOperation = "saturation";
@@ -240,6 +242,24 @@ const drawElement = (_renderObject, _index, _layersLen) => {
       imageCtx.fillRect(0, 0, format.width, format.height);
     }
 
+    // console.log(_renderObject.layer)
+
+    // step 3: adjust lightness, preserve hue and sat
+    // if (_renderObject.layer.light) {
+    //   let light = Math.floor(Math.random() * _renderObject.layer.light.high) +
+    //     _renderObject.layer.light.low;
+    //   console.log("light =", light)
+
+    //   // imageCtx.globalCompositeOperation = "luminosity";
+    //   // imageCtx.fillStyle = "hsl(100%, 100%, 0% )";
+    //   imageCtx.globalCompositeOperation = 'lighten';
+    //   // imageCtx.fillStyle='rgba(255,255,255,128)';
+    //   imageCtx.fillStyle = "white";
+    //   imageCtx.globalAlpha = 0.5;
+    //   imageCtx.fillRect(0, 0, format.width, format.height);
+    // }
+
+
     imageCtx.globalCompositeOperation = "destination-in";
     imageCtx.drawImage(
       _renderObject.loadedImage,
@@ -248,6 +268,39 @@ const drawElement = (_renderObject, _index, _layersLen) => {
       format.width,
       format.height
     );
+    if (_renderObject.layer.light) {
+      let light = Math.floor(Math.random() * _renderObject.layer.light.high) + _renderObject.layer.light.low;
+      //     _renderObject.layer.light.low;
+      var iD = imageCtx.getImageData(0, 0, format.width, format.height);
+      var dA = iD.data; // raw pixel data in array
+
+      var brightnessMul = light; // brightness multiplier
+
+      for (var i = 0; i < dA.length; i += 4) {
+        var red = dA[i]; // Extract original red color [0 to 255]
+        var green = dA[i + 1]; // Extract green
+        var blue = dA[i + 2]; // Extract blue
+
+        brightenedRed = brightnessMul * red;
+        brightenedGreen = brightnessMul * green;
+        brightenedBlue = brightnessMul * blue;
+
+        /**
+          *
+          * Remember, you should make sure the values brightenedRed,
+          * brightenedGreen, and brightenedBlue are between
+          * 0 and 255. You can do this by using
+          * Math.max(0, Math.min(255, brightenedRed))
+          *
+          */
+
+        dA[i] = brightenedRed;
+        dA[i + 1] = brightenedGreen;
+        dA[i + 2] = brightenedBlue;
+      }
+
+      imageCtx.putImageData(iD, 0, 0);
+    }
 
 
     console.log("---");
@@ -261,8 +314,8 @@ const drawElement = (_renderObject, _index, _layersLen) => {
       format.height
     );
 
-   
-    
+
+
   }
 
 
@@ -281,7 +334,8 @@ const constructLayerToDna = (_dna = "", _layers = []) => {
       opacity: layer.opacity,
       selectedElement: selectedElement,
       sat: layer.sat,
-      hue: layer.hue
+      hue: layer.hue,
+      light: layer.light
     };
   });
   return mappedDnaToLayers;
@@ -441,7 +495,7 @@ const startCreating = async () => {
             drawElement(
               renderObject,
               index,
-              layerConfigurations[layerConfigIndex].layersOrder.length,              
+              layerConfigurations[layerConfigIndex].layersOrder.length,
             );
             if (gif.export) {
               hashlipsGiffer.add();

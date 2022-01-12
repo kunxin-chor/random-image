@@ -29,43 +29,50 @@ const layerConfigurations = [
       {
         name: "Background", options: {
           'sat': { high: 100, low: 0 },
-          'hue': { high: 100, low: 0 }
+          'hue': { high: 100, low: 0 },
+          'light': { high: 10, low: 0.5}
         }
       },
       {
         name: "Eyeball", options: {
           'sat': { high: 100, low: 0 },
-          'hue': { high: 100, low: 0 }
+          'hue': { high: 100, low: 0 },
+          'light': { high: 10, low: 0.5}
         }
       },
       {
         name: "Eye color", options: {
           'sat': { high: 100, low: 0 },
-          'hue': { high: 100, low: 0 }
+          'hue': { high: 100, low: 0 },
+          'light': { high: 10, low: 0.5}
         }
       },
       {
         name: "Iris", options: {
           'sat': { high: 100, low: 0 },
-          'hue': { high: 100, low: 0 }
+          'hue': { high: 100, low: 0 },
+          'light': { high: 10, low: 0.5}
         }
       },
       {
         name: "Shine", options: {
           'sat': { high: 100, low: 0 },
-          'hue': { high: 100, low: 0 }
+          'hue': { high: 100, low: 0 },
+          'light': { high: 10, low: 0.5}
         }
       },
       {
         name: "Bottom lid", options: {
-          'sat': { high: 100, low: 0 },
-          'hue': { high: 100, low: 0 }
+          'sat': { high: 50, low: 50 },
+          'hue': { high: 100, low: 0 },
+          'light': { high: 10, low: 0.5}
         }
       },
       {
         name: "Top lid", options: {
-          'sat': { high: 100, low: 0 },
-          'hue': { high: 100, low: 0 }
+          'sat': { high: 50, low: 50 },
+          'hue': { high: 100, low: 0 },
+          'light': { high: 10, low: 0.5}
         }
       },
     ],
